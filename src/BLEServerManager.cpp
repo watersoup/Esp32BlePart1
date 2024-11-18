@@ -76,7 +76,22 @@ void BLEServerManager::init() {
     pAdvertising->start();
     advertFlag = true;
     Serial.println("Advertising ... ");
+
+    configureSecurity();
+
 }
+
+
+void BLEServerManager::configureSecurity() {
+    BLESecurity* pSecurity = new BLESecurity();
+    pSecurity->setAuthenticationMode(ESP_LE_AUTH_BOND);
+    pSecurity->setCapability(ESP_IO_CAP_IO);
+    pSecurity->setInitEncryptionKey(ESP_BLE_ENC_KEY_MASK | ESP_BLE_ID_KEY_MASK);
+    pSecurity->setKeySize(16);
+    pSecurity->setStaticPIN(123456); // Set your desired PIN here
+    BLEDevice::setSecurityCallbacks(new SecurityCallbacks());
+}
+
 
 bool BLEServerManager::startAdvertising() {
     if(pAdvertising){
@@ -112,3 +127,32 @@ void ClientCallback::onWrite(BLECharacteristic* pChar) {
     serverManager.handleClientData(pChar);
 }
 
+// SecurityCallbacks implementation
+uint32_t SecurityCallbacks::onPassKeyRequest() {
+    Serial.println("PassKeyRequest");
+    return 123456; // Return the same PIN that was set in configureSecurity
+}
+
+void SecurityCallbacks::onPassKeyNotify(uint32_t pass_key) {
+    Serial.print("PassKeyNotify: ");
+    Serial.println(pass_key);
+}
+
+bool SecurityCallbacks::onConfirmPIN(uint32_t pass_key) {
+    Serial.print("ConfirmPIN: ");
+    Serial.println(pass_key);
+    return true; // Return true to confirm the PIN
+}
+
+bool SecurityCallbacks::onSecurityRequest() {
+    Serial.println("SecurityRequest");
+    return true; // Return true to accept the security request
+}
+
+void SecurityCallbacks::onAuthenticationComplete(esp_ble_auth_cmpl_t cmpl) {
+    if (cmpl.success) {
+        Serial.println("Authentication Success");
+    } else {
+        Serial.println("Authentication Failed");
+    }
+}

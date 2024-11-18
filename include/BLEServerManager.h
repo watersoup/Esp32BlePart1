@@ -4,6 +4,7 @@
 #include <BLEServer.h>
 #include <BLEUtils.h>
 #include <BLE2902.h>
+#include <BLESecurity.h>
 #include <vector>
 #include <map>
 
@@ -25,6 +26,9 @@ public:
                             else  return clients.size(); }
 
 private:
+    void configureSecurity();
+
+
     std::string deviceName;
     std::string serviceUUID;
     std::vector<std::string> charUUIDs;
@@ -38,6 +42,14 @@ private:
 };
 
 
+class SecurityCallbacks : public BLESecurityCallbacks {
+public:
+    uint32_t onPassKeyRequest() override;
+    void onPassKeyNotify(uint32_t pass_key) override;
+    bool onConfirmPIN(uint32_t pass_key) override;
+    bool onSecurityRequest() override;
+    void onAuthenticationComplete(esp_ble_auth_cmpl_t cmpl) override;
+};
 
 class MyServerCallbacks : public BLEServerCallbacks {
 public:

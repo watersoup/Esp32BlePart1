@@ -28,7 +28,6 @@ std::vector<std::string> charUUIDs = {
     "7fac1651-859b-4865-96b9-da21b4205ad9"
 };
 const int BUILTINPIN = 8;
-void BLE_advert();
 
 void blink(const int PIN, int times=1, long int freq=500){
   for(int i = 0; i < times; i++){
